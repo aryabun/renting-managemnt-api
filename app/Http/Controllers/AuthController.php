@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
@@ -24,15 +23,19 @@ class AuthController extends Controller
             $data             = $request->validated();
             $data['password'] = Hash::make($request->password);
 
-            $user  = $this->user->create($data);
+            $user = $this->user->create([
+                 ...$data,
+                'password' => Hash::make($data['password']),
+                'role'     => 'user', // never trust client-supplied role
+            ]);
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
-                'status'       => 'Success',
-                'data'         => $user,
-                'message'      => 'User successfully created!',
-                'access_token' => $token,
-                'token_type'   => 'Bearer',
+                'status'     => 'Success',
+                'data'       => $user,
+                'message'    => 'User successfully created!',
+                'token'      => $token,
+                'token_type' => 'Bearer',
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -46,28 +49,34 @@ class AuthController extends Controller
     {
         try {
             # code...
-            $request->validate([
+            $credentials = $request->validate([
                 'email'    => 'required|email',
                 'password' => 'required',
+                'remember' => 'boolean',
             ]);
 
-            $user = $this->user->where('email', $request->email)->first();
+            $user = $this->user->where('email', $credentials['email'])->first();
 
-            if (! $user || !Hash::check($request->password, $user->password)) {
+            if (! $user || ! Hash::check($credentials['password'], $user->password)) {
                 # code...
                 throw ValidationException::withMessages([
                     'email' => ['The provided credentials are incorrect.'],
                 ]);
             }
-
-            $token = $user->createToken('auth_token')->plainTextToken;
+            // Remember me -> token with far expiration (or null = never expires)
+            // No remember -> short expiration
+            $expiresAt = ($credentials['remember'] ?? false)
+                ? now()->addYear()
+                : now()->addHours(12);
+            $token = $user->createToken('token', ['*'], $expiresAt)->plainTextToken;
 
             return response()->json([
-                'status'       => 'Success',
-                'data'         => $user->load('role'),
-                'message'      => "Login successfully!",
-                'access_token' => $token,
-                'token_type'   => 'Bearer',
+                'status'     => 'Success',
+                'data'       => $user,
+                'message'    => "Login successfully!",
+                'token'      => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => $expiresAt,
             ]);
         } catch (\Throwable $e) {
             # code...

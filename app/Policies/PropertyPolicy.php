@@ -1,19 +1,19 @@
 <?php
-
 namespace App\Policies;
 
 use App\Models\Property;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class PropertyPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user, Property $property): bool
     {
-        return false;
+         return $user->isSuperAdmin()
+        || $property->isOwnedBy($user)
+        || $property->hasMember($user);
     }
 
     /**
@@ -21,7 +21,9 @@ class PropertyPolicy
      */
     public function view(User $user, Property $property): bool
     {
-        return false;
+        return $user->isSuperAdmin()
+        || $property->isOwnedBy($user)
+        || $property->hasMember($user);
     }
 
     /**
@@ -37,7 +39,10 @@ class PropertyPolicy
      */
     public function update(User $user, Property $property): bool
     {
-        return false;
+        // owner or management team can update building info (e.g. address)
+        return $user->isSuperAdmin()
+        || $property->isOwnedBy($user)
+        || $property->hasMember($user);
     }
 
     /**
@@ -45,7 +50,8 @@ class PropertyPolicy
      */
     public function delete(User $user, Property $property): bool
     {
-        return false;
+        // only owner or super admin can delete the whole building
+        return $user->isSuperAdmin() || $property->isOwnedBy($user);
     }
 
     /**
@@ -62,5 +68,10 @@ class PropertyPolicy
     public function forceDelete(User $user, Property $property): bool
     {
         return false;
+    }
+    public function invite(User $user, Property $property): bool
+    {
+        // only the creator/owner (or super admin) can invite management team
+        return $user->isSuperAdmin() || $property->isOwnedBy($user);
     }
 }

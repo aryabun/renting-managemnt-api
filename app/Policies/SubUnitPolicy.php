@@ -1,19 +1,20 @@
 <?php
-
 namespace App\Policies;
 
+use App\Models\Property;
 use App\Models\SubUnit;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class SubUnitPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user, Property $property): bool
     {
-        return false;
+        return $user->isSuperAdmin()
+        || $property->isOwnedBy($user)
+        || $property->hasMember($user);
     }
 
     /**
@@ -27,9 +28,10 @@ class SubUnitPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Property $property): bool
     {
-        return false;
+         // ONLY owner or super admin — management team cannot create units
+        return $user->isSuperAdmin() || $property->isOwnedBy($user);
     }
 
     /**
@@ -37,7 +39,10 @@ class SubUnitPolicy
      */
     public function update(User $user, SubUnit $subUnit): bool
     {
-        return false;
+        // owner AND management team can update
+        return $user->isSuperAdmin()
+            || $subUnit->property->isOwnedBy($user)
+            || $subUnit->property->hasMember($user);
     }
 
     /**
@@ -45,7 +50,8 @@ class SubUnitPolicy
      */
     public function delete(User $user, SubUnit $subUnit): bool
     {
-        return false;
+        // ONLY owner or super admin — same restriction as create
+        return $user->isSuperAdmin() || $subUnit->property->isOwnedBy($user);
     }
 
     /**

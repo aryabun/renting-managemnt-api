@@ -1,28 +1,21 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class SubUnit extends Model
+class Team extends Model
 {
+    //
     use HasUuids;
-     /**
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'property_id',
-        'price',
-        'is_manual_bill',
-        'status_id',
-        'tenant_id',
+        'user_id',
+        'role',
     ];
-    public function property()
-    {
-        return $this->belongsTo(Property::class);
-    }
 }

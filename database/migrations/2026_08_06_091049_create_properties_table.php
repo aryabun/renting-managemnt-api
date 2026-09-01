@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('unit_type_id')->references('id')->on('unit_types')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('status_id')->references('id')->on('statuses')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('tenant_id')->nullable()->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignUuid('created_by')->references('id')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignUuid('owner_id')->references('id')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

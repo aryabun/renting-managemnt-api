@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('sub_units', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->text('address')->nullable();
+            $table->foreignUuid('property_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('price')->nullable();
             $table->boolean('is_manual_bill')->default(true)->nullable();
 
