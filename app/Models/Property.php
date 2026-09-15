@@ -1,12 +1,13 @@
 <?php
 namespace App\Models;
 
+use App\Traits\HasBillingComponents;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Property extends Model
 {
-    use HasUuids;
+    use HasUuids, HasBillingComponents;
 
     /**
      * The attributes that are mass assignable.
@@ -46,5 +47,9 @@ class Property extends Model
     public function hasMember(User $user): bool
     {
         return $this->members()->where('user_id', $user->id)->exists();
+    }
+    public function billingComponents()
+    {
+        return $this->morphMany(BillingComponent::class, 'billable');
     }
 }

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasBillingComponents;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class SubUnit extends Model
 {
-    use HasUuids;
+    use HasUuids, HasBillingComponents;
      /**
      * The attributes that are mass assignable.
      *
@@ -24,5 +25,9 @@ class SubUnit extends Model
     public function property()
     {
         return $this->belongsTo(Property::class);
+    }
+    public function billingComponents()
+    {
+        return $this->morphMany(BillingComponent::class, 'billable');
     }
 }

@@ -15,7 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->text('address')->nullable();
-            $table->unsignedBigInteger('price')->nullable();
 
             $table->foreignId('property_type_id')->references('id')->on('property_types')->cascadeOnUpdate()->cascadeOnDelete();;
             $table->foreignId('unit_type_id')->references('id')->on('unit_types')->cascadeOnUpdate()->cascadeOnDelete();

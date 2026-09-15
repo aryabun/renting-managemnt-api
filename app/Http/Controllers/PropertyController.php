@@ -1,10 +1,8 @@
 <?php
-
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PropertyRequest;
 use App\Models\Property;
-use App\Http\Requests\StorePropertyRequest;
-use App\Http\Requests\UpdatePropertyRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,9 +22,12 @@ class PropertyController extends Controller
         $user = $request->user();
 
         $properties = $user->isSuperAdmin()
-            ? $this->property->all()
-            : $this->property->where('owner_id', $user->id)
-            ->orWhereHas('members', fn($q) => $q->where('user_id', $user->id))
+            ? $this->property->with('units')->get()
+            : $this->property->with('units')
+            ->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                    ->orWhereHas('members', fn($q2) => $q2->where('user_id', $user->id));
+            })
             ->get();
 
         return response()->json($properties);
@@ -35,12 +36,12 @@ class PropertyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PropertyRequest $request)
     {
         try {
-            $data     = $request->validated();
+            $data             = $request->validated();
             $data['owner_id'] = Auth::id();
-            $property = $this->property->create($data);
+            $property         = $this->property->create($data);
 
             return response()->json([
                 'status'  => "Success!",
@@ -62,7 +63,9 @@ class PropertyController extends Controller
      */
     public function show(Property $property)
     {
-        //
+        return response()->json([
+            'data' => $property->load('units'),
+        ]);
     }
 
     /**
@@ -84,7 +87,7 @@ class PropertyController extends Controller
     {
         $this->authorize('invite', $property);
 
-        $data = $request->validate(['email' => 'required|email|exists:users,email']);
+        $data    = $request->validate(['email' => 'required|email|exists:users,email']);
         $invitee = User::where('email', $data['email'])->firstOrFail();
 
         $property->members()->syncWithoutDetaching([
