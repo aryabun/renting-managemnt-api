@@ -15,8 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->foreignUuid('property_id')->constrained()->cascadeOnDelete();
-            $table->unsignedBigInteger('price')->nullable();
-            $table->boolean('is_manual_bill')->default(true)->nullable();
 
             $table->foreignId('status_id')->nullable()->references('id')->on('statuses')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('tenant_id')->nullable()->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();

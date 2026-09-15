@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('billing_component_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name');             // "Rent", "Water", "Electricity"
+            $table->string('name_kh');             // "Rent", "Water", "Electricity"
+            $table->string('name_en');             // "Rent", "Water", "Electricity"
             $table->string('code')->nullable(); // "rent", "water", "electricity"
             $table->enum('type', ['fixed', 'metered'])->default('fixed');
             $table->timestamps();

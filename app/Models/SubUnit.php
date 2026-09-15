@@ -17,17 +17,11 @@ class SubUnit extends Model
     protected $fillable = [
         'name',
         'property_id',
-        'price',
-        'is_manual_bill',
         'status_id',
         'tenant_id',
     ];
     public function property()
     {
         return $this->belongsTo(Property::class);
-    }
-    public function billingComponents()
-    {
-        return $this->morphMany(BillingComponent::class, 'billable');
     }
 }

@@ -17,7 +17,6 @@ class Property extends Model
     protected $fillable = [
         'name',
         'address',
-        'price',
         'property_type_id',
         'unit_type_id',
         'status_id',
@@ -47,9 +46,5 @@ class Property extends Model
     public function hasMember(User $user): bool
     {
         return $this->members()->where('user_id', $user->id)->exists();
-    }
-    public function billingComponents()
-    {
-        return $this->morphMany(BillingComponent::class, 'billable');
     }
 }
